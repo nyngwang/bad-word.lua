@@ -3,13 +3,16 @@ local M = {}
 local fn = vim.fn
 local api = vim.api
 local max_len = 20
+local disable_on_lines = 2000
 
 function M.setup(opt)
-  max_len = opt.max_len
+  max_len = opt.max_len ~= nil and opt.max_len or max_len
+  disable_on_lines = opt.disable_on_lines ~= nil and opt.disable_on_lines or disable_on_lines
 end
 
 
 function M.highlight()
+  if vim.fn.getbufinfo(vim.fn.bufnr())[1].linecount > disable_on_lines then return end
   if fn.hlexists("BadWord") == 0 or api.nvim_exec("hi BadWord", true):find("cleared") then
     vim.cmd("hi! BadWord cterm=underline gui=underline")
   end
@@ -34,6 +37,7 @@ local function matchstr(...)
 end
 
 function M.matchadd()
+  if vim.fn.getbufinfo(vim.fn.bufnr())[1].linecount > disable_on_lines then return end
   if vim.tbl_contains(vim.g.bad_word_disable_filetypes or {}, vim.bo.filetype) then
     return
   end
@@ -63,6 +67,7 @@ function M.matchadd()
 end
 
 function M.matchdelete()
+  if vim.fn.getbufinfo(vim.fn.bufnr())[1].linecount > disable_on_lines then return end
   matchdelete(true)
 end
 
